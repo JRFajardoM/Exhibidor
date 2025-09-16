@@ -123,6 +123,12 @@
             <div class="form-section">
                 <label for="exhibidor-select">Elige un exhibidor para gestionar:</label>
                 <select id="exhibidor-select"></select>
+                <button onclick="eliminarExhibidorActual()" style="background-color: #dc3545;">Eliminar</button>
+                <button onclick="mostrarFormularioAgregar()">Agregar</button>
+            </div>
+            <div id="form-agregar-exhibidor" class="hidden" style="margin-top: 1em; border-top: 1px solid #eee; padding-top: 1em;">
+                <input type="text" id="nuevo-exhibidor-titulo" placeholder="Título del nuevo exhibidor">
+                <button onclick="guardarNuevoExhibidor()">Guardar</button>
             </div>
         </div>
 
@@ -349,6 +355,65 @@
             }
         }
 
+        function eliminarExhibidorActual() {
+            if (!exhibidorActualId) {
+                alert("No hay un exhibidor seleccionado para eliminar.");
+                return;
+            }
+
+            const datosCompletos = obtenerDatosCompletos();
+            const titulo = datosCompletos[exhibidorActualId].titulo;
+
+            if (confirm(`¿Estás seguro de que quieres eliminar el "${titulo}" y todos sus datos? Esta acción no se puede deshacer.`)) {
+                delete datosCompletos[exhibidorActualId];
+                guardarDatosCompletos(datosCompletos);
+                
+                // Forzar un reinicio completo de la aplicación
+                location.reload();
+            }
+        }
+
+        function mostrarFormularioAgregar() {
+            const form = document.getElementById('form-agregar-exhibidor');
+            form.classList.toggle('hidden');
+        }
+
+        function guardarNuevoExhibidor() {
+            const input = document.getElementById('nuevo-exhibidor-titulo');
+            const nuevoTitulo = input.value.trim();
+
+            if (nuevoTitulo === "") {
+                alert("Por favor, introduce un título para el nuevo exhibidor.");
+                return;
+            }
+
+            const datosCompletos = obtenerDatosCompletos();
+            const exhibidorIds = Object.keys(datosCompletos);
+
+            // Encontrar el número más alto en los IDs existentes para crear uno nuevo
+            let nuevoNumero = 1;
+            if (exhibidorIds.length > 0) {
+                const numeros = exhibidorIds.map(id => {
+                    const num = parseInt(id.replace('exhibidor', ''), 10);
+                    return isNaN(num) ? 0 : num;
+                });
+                nuevoNumero = Math.max(...numeros) + 1;
+            }
+            const nuevoId = `exhibidor${nuevoNumero}`;
+
+            datosCompletos[nuevoId] = {
+                titulo: nuevoTitulo,
+                subtitulo: "Ubicación no definida",
+                horarios: {}
+            };
+
+            guardarDatosCompletos(datosCompletos);
+            input.value = ''; // Limpiar input
+            
+            // Forzar reinicio para que se vea el nuevo exhibidor
+            location.reload();
+        }
+
         function reconstruirSubtitulo(subtitulo) {
             const wrapper = document.getElementById('subtitulo-wrapper');
             wrapper.innerHTML = ''; // Clear existing content
@@ -432,11 +497,14 @@
             const selectExhibidor = document.getElementById('exhibidor-select');
             const datosCompletos = obtenerDatosCompletos();
             const exhibidorIds = Object.keys(datosCompletos);
+            
             if (exhibidorIds.length === 0) {
-                console.error("No se encontraron datos de exhibidores para cargar.");
+                // Si no hay exhibidores, mostrar un mensaje y ocultar el resto de la UI.
+                document.querySelector('.container').innerHTML = '<h1>No hay exhibidores</h1><p>Agrega un nuevo exhibidor para comenzar.</p><div id="form-agregar-exhibidor" style="margin-top: 1em;"><input type="text" id="nuevo-exhibidor-titulo" placeholder="Título del nuevo exhibidor"><button onclick="guardarNuevoExhibidor()">Guardar Nuevo Exhibidor</button></div>';
                 return;
             }
-            exhibidorIds.forEach(id => {
+
+            exhibidorIds.sort().forEach(id => {
                 const option = document.createElement('option');
                 option.value = id;
                 option.textContent = datosCompletos[id].titulo;
