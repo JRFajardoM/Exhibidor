@@ -4,7 +4,107 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Exhibidores</title>
-    <link rel="stylesheet" href="estilos.css">
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            padding: 20px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #005A9C;
+        }
+        .subtitle {
+            text-align: center;
+            color: #555;
+            margin-top: -15px;
+            margin-bottom: 30px;
+        }
+        .card {
+            background-color: white;
+            padding: 1.5em 2em;
+            border-radius: 12px;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.08);
+            margin-bottom: 2em;
+        }
+        h2 {
+            color: #007BFF;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .form-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1em;
+            align-items: center;
+            margin-bottom: 1em;
+        }
+        label, select, button, input {
+            font-size: 1em;
+            padding: 0.6em;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007BFF;
+            color: white;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #resultado-seccion, #resultado-disponibilidad {
+            background-color: #f8f9fa;
+            padding: 1em;
+            border-radius: 6px;
+            margin-top: 1em;
+            min-height: 50px;
+        }
+        #lista-personas {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        #lista-personas li {
+            padding: 8px 5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e9ecef;
+        }
+        #lista-personas li:last-child {
+            border-bottom: none;
+        }
+        .hidden {
+            display: none;
+        }
+        .delete-btn {
+            margin-left: 10px;
+            color: #dc3545;
+            font-size: 0.8em;
+            font-weight: bold;
+            cursor: pointer;
+            border: 1px solid #ffb8c0;
+            background: #fffafa;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+        .delete-btn:hover {
+            background-color: #dc3545;
+            color: white;
+        }
+        #resultado-disponibilidad ul {
+            list-style-type: '✅ ';
+            padding-left: 25px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -83,6 +183,273 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <script>
+        // El objeto principal que contiene la información de TODOS los exhibidores.
+        const datosCompletosIniciales = {
+            "exhibidor1": {
+                "titulo": "Exhibidor 1",
+                "subtitulo": "Esquina Casa de La Hna Dora",
+                "horarios": {
+                    "LUNES": { "TURNO1_7_9": ["Nancy D Aquino", "Gerardo Aquino"], "TURNO2_9_11": ["Martha Vazquez", "Carmen Palazuelos"] },
+                    "MARTES": { "TURNO2_9_11": ["Dora Carrillo", "Marta Vazquez"], "TURNO4_13_15": ["Esperanza D Rumbo", "Ana de Ramirez"], "TURNO5_15_17": ["Josefina Tellesz", "Ana de Ramirez"] },
+                    "MIERCOLES": { "TURNO1_7_9": ["Anaisa Ramirez"], "TURNO2_9_11": ["VIKI ARÍAS"], "TURNO3_11_13": ["Adelita Ching"], "TURNO4_13_15": ["Josefina Tellez"] },
+                    "JUEVES": { "TURNO1_7_9": ["Marisela de Gonzalez"], "TURNO2_9_11": ["Ana D Ramirez", "Genoveva Aguilar", "Josefina Telles"], "TURNO5_15_17": ["Avelina Guzman"], "TURNO6_17_19": ["Adela D Santos"] },
+                    "VIERNES": { "TURNO1_7_9": ["LUCÍA DORANTES", "CARMEN DE REYES"], "TURNO2_9_11": ["Marta Vazquez", "Dora Carrillo"] },
+                    "SABADO": { "TURNO3_11_13": ["Mercedes Aguilar"], "TURNO4_13_15": ["Samuel Muñoz"] },
+                    "DOMINGO": {}
+                }
+            },
+            "exhibidor3": {
+                "titulo": "Exhibidor 3",
+                "subtitulo": "Esquina Dulceria Villanueva",
+                "horarios": {
+                    "LUNES": { "TURNO1_7_9": ["SANDRA DE RANGEL", "JORGE RANGEL"] },
+                    "MARTES": { "TURNO1_7_9": ["MARISELA DE GONZÁLEZ", "CARMÉN DE REYES"], "TURNO2_9_11": ["Jazmin de Caballero", "Crystal de Fajardo"] },
+                    "MIERCOLES": { "TURNO1_7_9": ["GENOVEVA AGUILAR", "MERCEDES AGUILAR"], "TURNO2_9_11": ["BETZABE DE BALDERAS", "TERE DE LA CRUZ"], "TURNO3_11_13": ["TERE DE LA CRUZ", "Griss de Hdz"] },
+                    "JUEVES": { "TURNO1_7_9": ["BETZABE DE BALDERAS", "SANDRA DE RANGEL"] },
+                    "VIERNES": { "TURNO1_7_9": ["FELIPE CASTILLO", "AIDA CASTILLO"], "TURNO2_9_11": ["Luis Rivera", "Ariel Bañuelos"] },
+                    "SABADO": { "TURNO1_7_9": ["PROCOPIO RUMBO", "Ezperanza de Rumbo"], "TURNO2_9_11": ["Jose Luis Altamirano", "Martin Ortega"] },
+                    "DOMINGO": {}
+                }
+            },
+            "exhibidor4": {
+                "titulo": "Exhibidor 4",
+                "subtitulo": "Afuera de Casa de la Fam Madrigal",
+                "horarios": {
+                    "LUNES": { "TURNO1_7_9": ["Marisela de Gonzalez", "Regina Madrigal"] },
+                    "MARTES": { "TURNO2_9_11": ["Adelita Ching", "Kesia Chiu"] },
+                    "MIERCOLES": { "TURNO4_13_15": ["Leonila Valenzuela", "Maura de Santillan"] },
+                    "JUEVES": { "TURNO2_9_11": ["Marci Barrera", "DORA CARRILLO"], "TURNO3_11_13": ["Marci Barrera", "DORA CARRILLO"] },
+                    "VIERNES": { "TURNO1_7_9": ["Carmen de Altamirano", "Marisela de Gonzalez"], "TURNO2_9_11": ["Oralia Martinez", "Linda Madrigal"] },
+                    "SABADO": { "TURNO1_7_9": ["Obdulia Vargas", "Kesia Chiu"] },
+                    "DOMINGO": { "TURNO2_9_11": ["Andres Muñoz", "Paty de Muñoz"] }
+                }
+            },
+            "exhibidor2": { "titulo": "Exhibidor 2", "subtitulo": "Lugar del Exhibidor 2", "horarios": {} },
+            "exhibidor5": { "titulo": "Exhibidor 5", "subtitulo": "Lugar del Exhibidor 5", "horarios": {} },
+            "exhibidor6": { "titulo": "Exhibidor 6", "subtitulo": "Lugar del Exhibidor 6", "horarios": {} },
+            "exhibidor7": { "titulo": "Exhibidor 7", "subtitulo": "Lugar del Exhibidor 7", "horarios": {} },
+            "exhibidor8": { "titulo": "Exhibidor 8", "subtitulo": "Lugar del Exhibidor 8", "horarios": {} }
+        };
+
+        let exhibidorActualId; // Variable global para saber qué exhibidor estamos viendo
+
+        // --- FUNCIONES DE MANEJO DE DATOS ---
+        function obtenerDatosCompletos() {
+            const datosGuardados = localStorage.getItem('datosCompletosExhibidores');
+            if (!datosGuardados) {
+                localStorage.setItem('datosCompletosExhibidores', JSON.stringify(datosCompletosIniciales));
+                return datosCompletosIniciales;
+            }
+            return JSON.parse(datosGuardados);
+        }
+
+        function guardarDatosCompletos(datos) {
+            localStorage.setItem('datosCompletosExhibidores', JSON.stringify(datos));
+        }
+
+        // --- FUNCIONES DE LA INTERFAZ ---
+        function actualizarVistaCompleta() {
+            if (!exhibidorActualId) return;
+            const datosCompletos = obtenerDatosCompletos();
+            const infoExhibidor = datosCompletos[exhibidorActualId];
+            if (!infoExhibidor) {
+                console.error("No se encontró información para el exhibidor:", exhibidorActualId);
+                return;
+            }
+            document.getElementById('titulo-exhibidor').textContent = infoExhibidor.titulo;
+            reconstruirSubtitulo(infoExhibidor.subtitulo);
+            consultarHorario();
+            document.getElementById('resultado-disponibilidad').innerHTML = '';
+        }
+
+        function consultarHorario() {
+            if (!exhibidorActualId) return;
+            const dia = document.getElementById('dia-select').value;
+            const turno = document.getElementById('turno-select').value;
+            const listaPersonasUI = document.getElementById('lista-personas');
+            const formAgregar = document.getElementById('form-agregar');
+            const datosCompletos = obtenerDatosCompletos();
+            const horariosDelExhibidor = datosCompletos[exhibidorActualId].horarios;
+            listaPersonasUI.innerHTML = '';
+            const personasAsignadas = horariosDelExhibidor[dia]?.[turno] || [];
+            if (personasAsignadas.length > 0) {
+                personasAsignadas.forEach((nombre, index) => {
+                    const li = document.createElement('li');
+                    const spanNombre = document.createElement('span');
+                    spanNombre.textContent = nombre;
+                    const deleteButton = document.createElement('button');
+                    deleteButton.textContent = 'Eliminar';
+                    deleteButton.className = 'delete-btn';
+                    deleteButton.onclick = () => eliminarPersona(dia, turno, index);
+                    li.appendChild(spanNombre);
+                    li.appendChild(deleteButton);
+                    listaPersonasUI.appendChild(li);
+                });
+            } else {
+                listaPersonasUI.innerHTML = '<li>Este horario está libre.</li>';
+            }
+            formAgregar.classList.remove('hidden');
+        }
+
+        function agregarPersona() {
+            if (!exhibidorActualId) return;
+            const dia = document.getElementById('dia-select').value;
+            const turno = document.getElementById('turno-select').value;
+            const nombreInput = document.getElementById('nombre-input');
+            const nuevoNombre = nombreInput.value.trim();
+            if (nuevoNombre === "") return alert("Por favor, escribe un nombre.");
+            const datosCompletos = obtenerDatosCompletos();
+            const horarios = datosCompletos[exhibidorActualId].horarios;
+            if (!horarios[dia]) horarios[dia] = {};
+            if (!horarios[dia][turno]) horarios[dia][turno] = [];
+            horarios[dia][turno].push(nuevoNombre);
+            guardarDatosCompletos(datosCompletos);
+            nombreInput.value = '';
+            consultarHorario();
+        }
+
+        function eliminarPersona(dia, turno, index) {
+            if (!exhibidorActualId) return;
+            if (!confirm("¿Estás seguro de que quieres eliminar a esta persona del horario?")) return;
+            const datosCompletos = obtenerDatosCompletos();
+            const horarios = datosCompletos[exhibidorActualId].horarios;
+            const nombreEliminado = horarios[dia][turno][index];
+            horarios[dia][turno].splice(index, 1);
+            guardarDatosCompletos(datosCompletos);
+            alert(`"${nombreEliminado}" ha sido eliminado con éxito.`);
+            consultarHorario();
+        }
+
+        function buscarDiasDisponibles() {
+            if (!exhibidorActualId) return;
+            const turnoBuscado = document.getElementById('turno-buscar-select').value;
+            const resultadoDiv = document.getElementById('resultado-disponibilidad');
+            const datosCompletos = obtenerDatosCompletos();
+            const horariosDelExhibidor = datosCompletos[exhibidorActualId].horarios;
+            const diasDeLaSemana = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES", "SABADO", "DOMINGO"];
+            const diasLibres = [];
+            diasDeLaSemana.forEach(dia => {
+                const personasEnTurno = horariosDelExhibidor[dia]?.[turnoBuscado] || [];
+                if (personasEnTurno.length === 0) {
+                    diasLibres.push(dia.charAt(0).toUpperCase() + dia.slice(1).toLowerCase());
+                }
+            });
+            if (diasLibres.length > 0) {
+                resultadoDiv.innerHTML = '<h4>Días con este turno disponible:</h4>';
+                const ul = document.createElement('ul');
+                diasLibres.forEach(dia => {
+                    const li = document.createElement('li');
+                    li.textContent = dia;
+                    ul.appendChild(li);
+                });
+                resultadoDiv.appendChild(ul);
+            } else {
+                resultadoDiv.innerHTML = '<p>No hay días libres para el turno seleccionado.</p>';
+            }
+        }
+
+        function reconstruirSubtitulo(subtitulo) {
+            const wrapper = document.getElementById('subtitulo-wrapper');
+            wrapper.innerHTML = ''; // Clear existing content
+
+            const p = document.createElement('p');
+            p.className = 'subtitle';
+
+            const span = document.createElement('span');
+            span.id = 'subtitulo-exhibidor';
+            span.textContent = subtitulo;
+            p.appendChild(span);
+
+            const editButton = document.createElement('button');
+            editButton.onclick = () => editarSubtitulo();
+            editButton.style.cssText = 'margin-left: 10px; border: none; background: none; cursor: pointer; padding: 5px;';
+
+            const editImg = document.createElement('img');
+            editImg.src = 'https://cdn-icons-png.flaticon.com/512/1159/1159633.png';
+            editImg.alt = 'Editar';
+            editImg.style.cssText = 'width: 20px; height: 20px;';
+            editButton.appendChild(editImg);
+
+            wrapper.appendChild(p);
+            wrapper.appendChild(editButton);
+        }
+
+        function editarSubtitulo() {
+            const wrapper = document.getElementById('subtitulo-wrapper');
+            const subtituloSpan = document.getElementById('subtitulo-exhibidor');
+            const subtituloActual = subtituloSpan.textContent;
+
+            wrapper.innerHTML = ''; // Clear existing content
+
+            const input = document.createElement('input');
+            input.type = 'text';
+            input.id = 'subtitulo-input';
+            input.value = subtituloActual;
+            input.style.cssText = 'font-size: 1.2em; border: none; border-bottom: 1px solid #ccc; text-align: center;';
+
+            const saveButton = document.createElement('button');
+            saveButton.onclick = () => guardarSubtitulo();
+            saveButton.style.cssText = 'margin-left: 10px; border: none; background: none; cursor: pointer; padding: 5px;';
+            const saveImg = document.createElement('img');
+            saveImg.src = 'https://cdn-icons-png.flaticon.com/512/148/148767.png';
+            saveImg.alt = 'Guardar';
+            saveImg.style.cssText = 'width: 20px; height: 20px;';
+            saveButton.appendChild(saveImg);
+
+            const cancelButton = document.createElement('button');
+            cancelButton.onclick = () => cancelarEdicionSubtitulo();
+            cancelButton.style.cssText = 'margin-left: 5px; border: none; background: none; cursor: pointer; padding: 5px;';
+            const cancelImg = document.createElement('img');
+            cancelImg.src = 'https://cdn-icons-png.flaticon.com/512/1828/1828843.png';
+            cancelImg.alt = 'Cancelar';
+            cancelImg.style.cssText = 'width: 20px; height: 20px;';
+            cancelButton.appendChild(cancelImg);
+
+            wrapper.appendChild(input);
+            wrapper.appendChild(saveButton);
+            wrapper.appendChild(cancelButton);
+        }
+
+        function guardarSubtitulo() {
+            const nuevoSubtitulo = document.getElementById('subtitulo-input').value;
+            const datosCompletos = obtenerDatosCompletos();
+
+            datosCompletos[exhibidorActualId].subtitulo = nuevoSubtitulo;
+            guardarDatosCompletos(datosCompletos);
+
+            reconstruirSubtitulo(nuevoSubtitulo);
+        }
+
+        function cancelarEdicionSubtitulo() {
+            const datosCompletos = obtenerDatosCompletos();
+            const subtituloOriginal = datosCompletos[exhibidorActualId].subtitulo;
+            reconstruirSubtitulo(subtituloOriginal);
+        }
+
+        // --- FUNCIÓN DE INICIALIZACIÓN ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const selectExhibidor = document.getElementById('exhibidor-select');
+            const datosCompletos = obtenerDatosCompletos();
+            const exhibidorIds = Object.keys(datosCompletos);
+            if (exhibidorIds.length === 0) {
+                console.error("No se encontraron datos de exhibidores para cargar.");
+                return;
+            }
+            exhibidorIds.forEach(id => {
+                const option = document.createElement('option');
+                option.value = id;
+                option.textContent = datosCompletos[id].titulo;
+                selectExhibidor.appendChild(option);
+            });
+            exhibidorActualId = exhibidorIds[0];
+            selectExhibidor.value = exhibidorActualId;
+            selectExhibidor.addEventListener('change', (e) => {
+                exhibidorActualId = e.target.value;
+                actualizarVistaCompleta();
+            });
+            actualizarVistaCompleta();
+        });
+    </script>
 </body>
 </html>
