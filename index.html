@@ -10,7 +10,12 @@
     <div class="container">
         <!-- Títulos dinámicos -->
         <h1>Gestión de Horarios - <span id="titulo-exhibidor"></span></h1>
-        <p class="subtitle"><span id="subtitulo-exhibidor"></span></p>
+        <div id="subtitulo-wrapper" style="display: flex; align-items: center; justify-content: center;">
+            <p class="subtitle"><span id="subtitulo-exhibidor"></span></p>
+            <button onclick="editarSubtitulo()" style="margin-left: 10px; border: none; background: none; cursor: pointer; padding: 5px;">
+                <img src="https://cdn-icons-png.flaticon.com/512/1159/1159633.png" alt="Editar" style="width: 20px; height: 20px;">
+            </button>
+        </div>
 
         <!-- Tarjeta para seleccionar el Exhibidor -->
         <div class="card">
@@ -23,7 +28,7 @@
 
         <!-- Tarjeta para consultar y modificar el horario del exhibidor seleccionado -->
         <div class="card">
-            <h2>Horarios y Asignados</h2>
+            <h2>Consultar y Modificar Horario</h2>
             <div class="form-section">
                 <label for="dia-select">Día:</label>
                 <select id="dia-select">
@@ -50,7 +55,7 @@
             </div>
 
             <div id="resultado-seccion">
-                <h3>Hermanos Asignados:</h3>
+                <h3>Personas Asignadas:</h3>
                 <ul id="lista-personas"></ul>
                 <div id="form-agregar" class="hidden">
                     <input type="text" id="nombre-input" placeholder="Nombre de la persona">
@@ -61,9 +66,7 @@
 
         <!-- Tarjeta para buscar disponibilidad en el exhibidor seleccionado -->
         <div class="card">
-            <h2>Gestión de Horarios - <span id="titulo-exhibidor"></span></h2>
-        <p class="subtitle"><span id="subtitulo-exhibidor"></span></p>
-
+            <h2>Buscar Turnos Disponibles</h2>
             <div class="form-section">
                 <label for="turno-buscar-select">Ver disponibilidad para el turno:</label>
                 <select id="turno-buscar-select">
